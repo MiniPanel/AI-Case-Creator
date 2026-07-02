@@ -1,0 +1,35 @@
+{
+  "manifest_version": 3,
+  "name": "HP Case Automation",
+  "version": "3.0",
+  "description": "Create HP cases via a popup form",
+
+  "permissions": [
+    "tabs",
+    "scripting",
+    "storage",
+    "activeTab"
+  ],
+
+  "host_permissions": [
+    "https://hpcdax.crm.dynamics.com/*",
+   "http://localhost:11434/*"
+  ],
+
+  "background": {
+    "service_worker": "background.js"
+  },
+
+  "action": {
+    "default_title": "HP Case Automation",
+    "default_popup": "popup.html"
+  },
+
+  "content_scripts": [
+    {
+      "matches": ["https://hpcdax.crm.dynamics.com/*"],
+      "js": ["content.js"],
+      "run_at": "document_idle"
+    }
+  ]
+}

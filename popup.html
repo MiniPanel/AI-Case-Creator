@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>HP Case Automation</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      width: 340px;
+      font-family: 'Segoe UI', system-ui, sans-serif;
+      background: #0f1117;
+      color: #e2e4ea;
+      padding: 0;
+    }
+
+    .header {
+      background: linear-gradient(135deg, #0096d6 0%, #0057a8 100%);
+      padding: 14px 16px 12px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .header-icon {
+      width: 28px;
+      height: 28px;
+      background: rgba(255,255,255,0.15);
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 14px;
+    }
+
+    .header h1 {
+      font-size: 13px;
+      font-weight: 600;
+      color: #fff;
+      letter-spacing: 0.3px;
+    }
+
+    .header p {
+      font-size: 10px;
+      color: rgba(255,255,255,0.65);
+      margin-top: 1px;
+    }
+
+    .form-body {
+      padding: 14px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .section-label {
+      font-size: 9px;
+      font-weight: 700;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+      color: #0096d6;
+      margin: 12px 0 8px;
+    }
+
+    .section-label:first-child {
+      margin-top: 0;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 4px;
+      margin-bottom: 8px;
+    }
+
+    .field.full { grid-column: 1 / -1; }
+
+    label {
+      font-size: 10px;
+      color: #8b90a0;
+      font-weight: 500;
+    }
+
+    input, select {
+      background: #1a1d27;
+      border: 1px solid #2a2d3a;
+      border-radius: 6px;
+      color: #e2e4ea;
+      font-size: 12px;
+      padding: 7px 10px;
+      outline: none;
+      transition: border-color 0.15s;
+      font-family: inherit;
+      width: 100%;
+    }
+
+    input:focus, select:focus {
+      border-color: #0096d6;
+    }
+
+    select option { background: #1a1d27; }
+
+    .paste-zone {
+      background: #1a1d27;
+      border: 1.5px dashed #2a2d3a;
+      border-radius: 8px;
+      padding: 10px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s;
+    }
+
+    .paste-zone:focus-within { border-color: #0096d6; }
+
+    .paste-zone textarea {
+      background: transparent;
+      border: none;
+      color: #e2e4ea;
+      font-size: 11px;
+      font-family: 'Consolas', 'Courier New', monospace;
+      width: 100%;
+      height: 72px;
+      resize: none;
+      outline: none;
+      line-height: 1.5;
+    }
+
+    .paste-zone textarea::placeholder { color: #3e4255; }
+
+    .paste-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: 6px;
+      margin-top: 6px;
+    }
+
+    .btn-paste-action {
+      font-size: 10px;
+      padding: 3px 10px;
+      border-radius: 5px;
+      cursor: pointer;
+      font-family: inherit;
+      border: 1px solid #2a2d3a;
+      background: #0f1117;
+      color: #8b90a0;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-paste-action:hover { border-color: #0096d6; color: #0096d6; }
+    .btn-paste-action.primary { background: #0096d6; border-color: #0096d6; color: #fff; }
+    .btn-paste-action.primary:hover { opacity: 0.85; }
+    .btn-paste-action.ai {
+      background: linear-gradient(135deg, #7c3aed, #4f46e5);
+      border-color: #7c3aed;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+    }
+    .btn-paste-action.ai:hover { opacity: 0.85; border-color: #7c3aed; color: #fff; }
+    .btn-paste-action.ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+    .ai-spinner {
+      width: 9px; height: 9px;
+      border: 1.5px solid rgba(255,255,255,0.3);
+      border-top-color: #fff;
+      border-radius: 50%;
+      animation: spin 0.7s linear infinite;
+      display: none;
+    }
+    .ai-spinner.active { display: inline-block; }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .ai-status {
+      font-size: 9.5px;
+      color: #7c3aed;
+      margin-top: 5px;
+      min-height: 14px;
+      display: none;
+    }
+    .ai-status.visible { display: block; }
+    .ai-status.error { color: #e05c5c; }
+    .ai-status.done { color: #3ecf8e; }
+
+    .api-key-row {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      margin-bottom: 8px;
+    }
+    .api-key-row label { font-size: 10px; color: #8b90a0; white-space: nowrap; }
+    .api-key-row input {
+      flex: 1;
+      font-size: 11px;
+      padding: 5px 8px;
+      letter-spacing: 1px;
+    }
+
+
+      height: 1px;
+      background: #1e2130;
+      margin: 4px 0 0;
+    }
+
+    .footer {
+      padding: 12px 16px 14px;
+      display: flex;
+      gap: 8px;
+    }
+
+    .btn-clear {
+      flex: 0 0 auto;
+      padding: 0 14px;
+      height: 36px;
+      background: #1a1d27;
+      border: 1px solid #2a2d3a;
+      border-radius: 7px;
+      color: #8b90a0;
+      font-size: 12px;
+      cursor: pointer;
+      font-family: inherit;
+      transition: border-color 0.15s, color 0.15s;
+    }
+
+    .btn-clear:hover { border-color: #444; color: #ccc; }
+
+    .btn-submit {
+      flex: 1;
+      height: 36px;
+      background: linear-gradient(135deg, #0096d6, #0057a8);
+      border: none;
+      border-radius: 7px;
+      color: #fff;
+      font-size: 12px;
+      font-weight: 600;
+      cursor: pointer;
+      font-family: inherit;
+      letter-spacing: 0.3px;
+      transition: opacity 0.15s;
+    }
+
+    .btn-submit:hover { opacity: 0.88; }
+    .btn-submit:disabled { opacity: 0.4; cursor: not-allowed; }
+
+    .status {
+      font-size: 10px;
+      text-align: center;
+      padding: 0 16px 10px;
+      color: #8b90a0;
+      min-height: 18px;
+    }
+
+    .status.running { color: #0096d6; }
+    .status.error   { color: #e05c5c; }
+    .status.done    { color: #3ecf8e; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <div class="header-icon">⚡</div>
+    <div>
+      <h1>HP Case Automation</h1>
+      <p>Paste customer data or fill manually</p>
+    </div>
+  </div>
+
+  <div class="form-body">
+
+    <div class="paste-zone">
+      <textarea id="pasteArea" placeholder="Paste raw customer data here — name, phone, address, serial, issue — anything. AI will structure it. →"></textarea>
+      <div class="ai-status" id="aiStatus"></div>
+      <div class="paste-actions">
+        <button class="btn-paste-action" id="btnPasteClear">Clear</button>
+        <button class="btn-paste-action primary" id="btnParse">Parse →</button>
+        <button class="btn-paste-action ai" id="btnAIParse">
+          <span class="ai-spinner" id="aiSpinner"></span>
+          ✦ AI Parse
+        </button>
+      </div>
+    </div>
+
+    <div class="section-label">Customer</div>
+
+    <div class="row">
+      <div class="field">
+        <label>First Name</label>
+        <input id="FirstName" type="text" placeholder="John" />
+      </div>
+      <div class="field">
+        <label>Last Name</label>
+        <input id="LastName" type="text" placeholder="Doe" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Email</label>
+      <input id="Email" type="email" placeholder="john@example.com" />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>Phone</label>
+        <input id="Phone" type="text" placeholder="+61 412 345 678" />
+      </div>
+      <div class="field">
+        <label>Country</label>
+        <select id="Country">
+          <option value="">— Select —</option>
+          <option>Australia</option>
+          <option>New Zealand</option>
+          <option>Singapore</option>
+          <option>Malaysia</option>
+          <option>Philippines</option>
+          <option>Indonesia</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="section-label">Address</div>
+
+    <div class="field">
+      <label>Address Line 1</label>
+      <input id="Address1" type="text" placeholder="123 Main St" />
+    </div>
+    <div class="field">
+      <label>Address Line 2</label>
+      <input id="Address2" type="text" placeholder="Unit / Suite (optional)" />
+    </div>
+
+    <div class="row">
+      <div class="field">
+        <label>City</label>
+        <input id="City" type="text" placeholder="Sydney" />
+      </div>
+      <div class="field">
+        <label>State / Province</label>
+        <input id="State" type="text" placeholder="NSW" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Postal Code</label>
+      <input id="PostalCode" type="text" placeholder="2000" />
+    </div>
+
+    <div class="section-label">Device & Issue</div>
+
+    <div class="row">
+      <div class="field">
+        <label>Serial Number</label>
+        <input id="Serial" type="text" placeholder="CND1234567" />
+      </div>
+      <div class="field">
+        <label>Product Number</label>
+        <input id="ProductNumber" type="text" placeholder="5CD1234ABC" />
+      </div>
+    </div>
+
+    <div class="field">
+      <label>Issue Description</label>
+      <input id="Issue" type="text" placeholder="e.g. Screen flickering" />
+    </div>
+
+  </div>
+
+  <div class="divider"></div>
+
+  <div class="status" id="status"></div>
+
+  <div class="footer">
+    <button class="btn-clear" id="btnClear">Clear</button>
+    <button class="btn-submit" id="btnSubmit">Create Case →</button>
+  </div>
+
+  <script src="popup.js"></script>
+</body>
+</html>
